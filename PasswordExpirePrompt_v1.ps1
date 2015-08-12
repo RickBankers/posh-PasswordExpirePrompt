@@ -4,7 +4,9 @@
 	.DESCRIPTION
     	Password expiration notice dialog. When the users password expiration is less than 5
 		days the dialog appears notifying them their password is about to expire. Create a GPO
-		and set this as the logon script.
+		and set this as the logon script. The script does not require AD cmdlets and uses
+		ADSI. It should also work with FGPP because it uses:
+		msDS-UserPasswordExpiryTimeComputed => 2008 Domain Schema
 		
 		The background color changes based on the remaining days before the password expires.
 		Expires <= 5 days background: Blue
