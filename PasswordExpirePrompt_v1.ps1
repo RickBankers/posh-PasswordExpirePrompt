@@ -27,7 +27,7 @@ $inputXML = @"
 <Window x:Class="PasswordExpires_v200.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="1CUNA Information" Height="225" Width="565" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" HorizontalAlignment="Center" Background="#FF2AA0F1">
+        Title="Password Expires" Height="225" Width="565" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" HorizontalAlignment="Center" Background="#FF2AA0F1">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="15" />
