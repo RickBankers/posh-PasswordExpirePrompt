@@ -14,7 +14,7 @@
 		Created by: 	Rick Bankers
 		Date created:	08/11/15
 	.LINK
-	
+		https://github.com/RickBankers/posh-PasswordExpirePrompt
 #>
 Clear-Host
 
