@@ -4,9 +4,7 @@
 	.DESCRIPTION
     	Password expiration notice dialog. When the users password expiration is less than 5
 		days the dialog appears notifying them their password is about to expire. Create a GPO
-		and set this as the logon script. The script does not require AD cmdlets and uses
-		ADSI. It should also work with FGPP because it uses the following AD attribute:
-		msDS-UserPasswordExpiryTimeComputed => 2008 Domain Schema
+		and set this as the logon script.
 		
 		The background color changes based on the remaining days before the password expires.
 		Expires <= 5 days background: Blue
@@ -16,7 +14,7 @@
 		Created by: 	Rick Bankers
 		Date created:	08/11/15
 	.LINK
-		https://github.com/RickBankers/posh-PasswordExpirePrompt
+	
 #>
 Clear-Host
 
@@ -29,7 +27,7 @@ $inputXML = @"
 <Window x:Class="PasswordExpires_v200.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Password Expires" Height="225" Width="565" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" HorizontalAlignment="Center" Background="#FF2AA0F1">
+        Title="1CUNA Information" Height="225" Width="565" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" HorizontalAlignment="Center" Background="#FF2AA0F1">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="15" />
@@ -129,7 +127,7 @@ param (
     if (!$Properties) {            
         $Properties = 'Name','ADSPath'            
     }            
-            
+Try {            
     (New-Object ADSISearcher -ArgumentList @(            
         $Root,            
         $LDAP,            
@@ -148,16 +146,29 @@ param (
         }            
         New-Object PSObject -Property $ObjectProps |             
             select $Properties            
-    }            
+    }
+	}
+Catch { $Null }
 }
 
 #===========================================================================
 # Check user's UserAccountControl and msDS-UserPasswordExpiryTimeComputed
-# properties and display dialog.
+# properties and display dialog. 
 #===========================================================================
-$userRegInfo = Get-ItemProperty "HKCU:\Volatile Environment"
-$adUser = $userRegInfo.Username
+$timeOut = 0
+
+Do {
+	$adUser = (Get-ItemProperty "HKCU:\Volatile Environment").UserName
+	$timeOut += 1
+	If ($timeOut -gt 10) {
+		Exit
+	}
+	Start-Sleep -Seconds 1
+}
+Until ((Get-ItemProperty "HKCU:\Volatile Environment").UserName)
+
 $adUserInfo = Search-AD -filter "samaccountname=$adUser" @("msDS-UserPasswordExpiryTimeComputed","UserAccountControl")
+
 #$adUserInfo."useraccountcontrol"
 #$adUserInfo."msds-userpasswordexpirytimecomputed"
 #(([datetime]::FromFileTime($adUserInfo."msds-userpasswordexpirytimecomputed"))-(Get-Date)).Days
@@ -168,7 +179,9 @@ $adUserInfo = Search-AD -filter "samaccountname=$adUser" @("msDS-UserPasswordExp
 If ($adUserInfo."useraccountcontrol" -ge 65536) {
 	Exit  # Password set to never expire.
 }
+
 $actualExpirationDays = (([datetime]::FromFileTime($adUserInfo."msds-userpasswordexpirytimecomputed"))-(Get-Date)).Days
+If ($actualExpirationDays -lt 0 ) { $actualExpirationDays = 0 }
 
 $WPFexpireDays.Text = $actualExpirationDays
 
@@ -204,7 +217,7 @@ If ($actualExpirationDays -le 5)
 # Set to $true to always display dialog for debugging.
 #===========================================================================
 
-If ($true)
+If ($false)
 	{
 		$Form.Background = "DodgerBlue" 
 		$errMsg = ("Password expiration notification: $UserName password expires in $actualExpirationDays days" )
